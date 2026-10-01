@@ -1,0 +1,26 @@
+<div class="flex gap-2 mb-6">
+
+  <button
+    type="button"
+    (click)="setView('task')"
+    [class.bg-blue-600]="currentView === 'task'"
+    [class.text-white]="currentView === 'task'"
+    class="px-4 py-2 rounded-lg border">
+
+    Par tâche
+
+  </button>
+
+
+  <button
+    type="button"
+    (click)="setView('user')"
+    [class.bg-blue-600]="currentView === 'user'"
+    [class.text-white]="currentView === 'user'"
+    class="px-4 py-2 rounded-lg border">
+
+    Par user
+
+  </button>
+
+</div>

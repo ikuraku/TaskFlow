@@ -1,0 +1,27 @@
+<div class="min-h-screen bg-gray-50 p-6">
+
+  <div class="max-w-7xl mx-auto">
+
+    <h1 class="text-3xl font-bold mb-6">
+      TaskFlow
+    </h1>
+
+
+    <app-view-toggle
+      (viewChange)="changeView($event)">
+    </app-view-toggle>
+
+
+    @if (currentView === 'task') {
+
+      <app-project-list></app-project-list>
+
+    } @else {
+
+      <app-user-list></app-user-list>
+
+    }
+
+  </div>
+
+</div>
