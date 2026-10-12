@@ -1,0 +1,30 @@
+<ul class="divide-y divide-gray-200">
+  @for (task of tasks; track task.id) {
+    <li class="py-2">
+      <div class="flex items-center justify-between gap-2">
+        <p class="font-medium">{{ task.title }}</p>
+        <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+          {{ task.status }}
+        </span>
+      </div>
+
+      <p class="text-xs text-gray-500">Priorité : {{ task.priority }}</p>
+
+      <p class="text-sm text-gray-600">{{ task.description | truncate:40 }}</p>
+
+      <p class="text-xs text-gray-500">
+        {{ task.dueDate | date:'dd/MM/yyyy' }}
+        @if (task.dueDate) { · }
+        {{ task.dueDate | deadline }}
+      </p>
+
+      @if (showAssignee) {
+        <p class="text-xs text-indigo-600">
+          Assignée à : {{ getAssigneeName(task.assigneeId) }}
+        </p>
+      }
+    </li>
+  } @empty {
+    <li class="py-2 text-sm text-gray-500">Aucune tâche.</li>
+  }
+</ul>

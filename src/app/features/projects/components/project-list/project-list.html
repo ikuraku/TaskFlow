@@ -1,0 +1,30 @@
+<div class="p-6">
+
+  <h1 class="text-3xl font-bold mb-6">
+    Mes projets
+  </h1>
+
+  @if (projects.length > 0) {
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      @for (project of projects; track project.id) {
+
+        <app-project-card
+          [project]="project"
+          (selected)="selectProject($event)">
+        </app-project-card>
+
+      }
+
+    </div>
+
+  } @else {
+
+    <p class="text-gray-500">
+      Aucun projet disponible.
+    </p>
+
+  }
+
+</div>
