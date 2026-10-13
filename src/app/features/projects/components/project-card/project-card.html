@@ -1,40 +1,94 @@
 <div
   appHighlight
   (click)="onSelect()"
-  class="cursor-pointer rounded-lg border border-gray-200 p-4 shadow-sm transition hover:shadow-md">
+  class="h-full cursor-pointer rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md">
 
+  <!-- Titre + statut -->
   <div class="flex items-start justify-between gap-2">
-    <h3 class="text-lg font-bold">{{ project.name | uppercase }}</h3>
-    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-      {{ project.status }}
-    </span>
+    <h3 class="text-base font-bold text-gray-900">{{ project.name | uppercase }}</h3>
+
+    @switch (project.status) {
+      @case ('En cours') {
+        <span class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+          {{ project.status }}
+        </span>
+      }
+      @case ('Terminé') {
+        <span class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+          {{ project.status }}
+        </span>
+      }
+      @default {
+        <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+          {{ project.status }}
+        </span>
+      }
+    }
   </div>
 
   <p class="mt-1 text-sm text-gray-600">{{ project.description }}</p>
 
-  <p class="mt-2 text-sm text-gray-500">
-    Début : {{ project.startDate | date:'dd MMMM yyyy' }}
-  </p>
-  <p class="text-sm">
-    Budget : {{ project.budget | currency:'TND':'code':'1.2-2' }}
-  </p>
+  <!-- Infos -->
+  <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
+    <div>
+      <dt class="text-xs text-gray-500">Début</dt>
+      <dd class="font-medium">{{ project.startDate | date:'dd MMMM yyyy' }}</dd>
+    </div>
+    <div>
+      <dt class="text-xs text-gray-500">Budget</dt>
+      <dd class="font-medium">{{ project.budget | currency:'TND':'code':'1.2-2' }}</dd>
+    </div>
+  </dl>
 
   @if (project.tasks.length > 0) {
-    <p class="text-sm">Réalisation : {{ completionRate | percent:'1.0-0' }}</p>
-    <p class="text-sm">Coût moyen par tâche : {{ averageCost | number:'1.0-0' }}</p>
 
-    <ul class="mt-2 list-disc pl-5 text-sm">
+    <!-- Avancement -->
+    <div class="mt-3">
+      <div class="flex justify-between text-xs text-gray-600">
+        <span>Réalisation</span>
+        <span class="font-medium">{{ completionRate | percent:'1.0-0' }}</span>
+      </div>
+      <div class="mt-1 h-2 overflow-hidden rounded-full bg-gray-200">
+        <div
+          class="h-full rounded-full bg-green-500"
+          [style.width.%]="completionRate * 100">
+        </div>
+      </div>
+      <p class="mt-1 text-xs text-gray-500">
+        Coût moyen par tâche : {{ averageCost | number:'1.0-0' }} TND
+      </p>
+    </div>
+
+    <!-- Aperçu des 3 premières tâches -->
+    <ul class="mt-3 space-y-1 text-sm">
       @for (task of project.tasks | slice:0:3; track task.id) {
-        <li>{{ task.title }}</li>
+        <li class="flex items-center gap-2">
+          <span
+            class="h-2 w-2 shrink-0 rounded-full"
+            [class.bg-green-500]="task.status === 'Terminé'"
+            [class.bg-blue-500]="task.status === 'En cours'"
+            [class.bg-gray-400]="task.status === 'En attente'">
+          </span>
+          <span class="truncate">{{ task.title }}</span>
+        </li>
+      }
+      @if (project.tasks.length > 3) {
+        <li class="text-xs text-gray-500">+ {{ project.tasks.length - 3 }} autre(s)</li>
       }
     </ul>
 
-    <div class="mt-2 flex flex-wrap gap-2 text-xs">
+    <!-- Compteurs par priorité -->
+    <div class="mt-3 flex flex-wrap gap-2 text-xs">
       @for (item of tasksByPriority | keyvalue; track item.key) {
-        <span class="rounded bg-gray-100 px-2 py-1">{{ item.key }} : {{ item.value }}</span>
+        <span class="rounded bg-gray-100 px-2 py-1 text-gray-700">
+          {{ item.key }} : {{ item.value }}
+        </span>
       }
     </div>
+
   } @else {
-    <p class="mt-2 text-sm text-gray-500">Aucune tâche.</p>
+    <p class="mt-3 rounded border border-dashed border-gray-300 p-3 text-center text-sm text-gray-500">
+      Aucune tâche
+    </p>
   }
 </div>

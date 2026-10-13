@@ -5,29 +5,67 @@
       appOverdue
       [dueDate]="task.dueDate"
       [done]="task.status === 'Terminé'"
-      class="rounded border-l-4 p-2">
+      class="rounded border-l-4 p-3 shadow-sm ring-1 ring-gray-200 transition">
 
-      <div class="flex items-center justify-between gap-2">
-        <p class="font-medium">{{ task.title }}</p>
-        <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-          {{ task.status }}
-        </span>
+      <!-- Titre + statut -->
+      <div class="flex items-start justify-between gap-2">
+        <p class="font-medium text-gray-900">{{ task.title }}</p>
+
+        @switch (task.status) {
+          @case ('Terminé') {
+            <span class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+              {{ task.status }}
+            </span>
+          }
+          @case ('En cours') {
+            <span class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+              {{ task.status }}
+            </span>
+          }
+          @default {
+            <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+              {{ task.status }}
+            </span>
+          }
+        }
       </div>
 
-      <p class="text-xs text-gray-500">Priorité : {{ task.priority }}</p>
+      <!-- Priorité -->
+      <div class="mt-1">
+        @switch (task.priority) {
+          @case ('Haute') {
+            <span class="rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-700">Priorité haute</span>
+          }
+          @case ('Moyenne') {
+            <span class="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-700">Priorité moyenne</span>
+          }
+          @default {
+            <span class="rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-700">Priorité basse</span>
+          }
+        }
+      </div>
 
-      <p class="text-sm text-gray-600" [appTooltip]="task.description ?? ''">
-        {{ task.description | truncate:40 }}
+      <!-- Description tronquée + infobulle -->
+      @if (task.description) {
+        <p class="mt-2 cursor-help text-sm text-gray-600" [appTooltip]="task.description">
+          {{ task.description | truncate:40 }}
+        </p>
+      } @else {
+        <p class="mt-2 text-sm italic text-gray-400">Aucune description</p>
+      }
+
+      <!-- Échéance -->
+      <p class="mt-2 text-xs text-gray-500">
+        @if (task.dueDate) {
+          {{ task.dueDate | date:'dd/MM/yyyy' }} · {{ task.dueDate | deadline }}
+        } @else {
+          {{ task.dueDate | deadline }}
+        }
       </p>
 
-      <p class="text-xs text-gray-500">
-        {{ task.dueDate | date:'dd/MM/yyyy' }}
-        @if (task.dueDate) { · }
-        {{ task.dueDate | deadline }}
-      </p>
-
+      <!-- Assigné -->
       @if (showAssignee) {
-        <p class="text-xs text-indigo-600">
+        <p class="mt-1 text-xs text-indigo-600">
           Assignée à : {{ getAssigneeName(task.assigneeId) }}
         </p>
       }
