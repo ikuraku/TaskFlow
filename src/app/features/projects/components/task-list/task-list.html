@@ -1,6 +1,12 @@
-<ul class="divide-y divide-gray-200">
+<ul class="space-y-2">
   @for (task of tasks; track task.id) {
-    <li class="py-2">
+    <li
+      appHighlight="#e0f2fe"
+      appOverdue
+      [dueDate]="task.dueDate"
+      [done]="task.status === 'Terminé'"
+      class="rounded border-l-4 p-2">
+
       <div class="flex items-center justify-between gap-2">
         <p class="font-medium">{{ task.title }}</p>
         <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
@@ -10,7 +16,9 @@
 
       <p class="text-xs text-gray-500">Priorité : {{ task.priority }}</p>
 
-      <p class="text-sm text-gray-600">{{ task.description | truncate:40 }}</p>
+      <p class="text-sm text-gray-600" [appTooltip]="task.description ?? ''">
+        {{ task.description | truncate:40 }}
+      </p>
 
       <p class="text-xs text-gray-500">
         {{ task.dueDate | date:'dd/MM/yyyy' }}

@@ -4,6 +4,7 @@ import { User } from '../../models/user.model';
 import { Project } from '../../../projects/models/project.model';
 import { Task } from '../../../projects/models/task.model';
 import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
+import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
 import { UserProjectGroup } from '../user-project-group/user-project-group';
 
 export interface ProjectTasksGroup {
@@ -14,14 +15,13 @@ export interface ProjectTasksGroup {
 @Component({
   selector: 'app-user-card',
   standalone: true,
-  imports: [TitleCasePipe, LowerCasePipe, InitialsPipe, UserProjectGroup],
+  imports: [TitleCasePipe, LowerCasePipe, InitialsPipe, HighlightDirective, UserProjectGroup],
   templateUrl: './user-card.html',
 })
 export class UserCard {
   @Input({ required: true }) user!: User;
   @Input() projects: Project[] = [];
 
-  /** Tâches de l'utilisateur, regroupées par projet (les projets sans tâche pour lui sont ignorés). */
   get groups(): ProjectTasksGroup[] {
     return this.projects
       .map(project => ({

@@ -1,20 +1,10 @@
-<div class="border rounded-lg p-4">
-
-  <div class="flex justify-between items-center mb-3">
-
-    <h3 class="font-bold text-lg">
-      {{ project.name }}
-    </h3>
-
-    <span class="bg-gray-100 px-3 py-1 rounded-full">
-      {{ tasks.length }} tâche(s)
+<div class="rounded-md border border-gray-200 p-3">
+  <div class="mb-2 flex items-center justify-between">
+    <h4 class="text-sm font-semibold">{{ projectName }}</h4>
+    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+      {{ tasks.length }} tâche{{ tasks.length > 1 ? 's' : '' }}
     </span>
-
   </div>
 
-  <app-task-list
-    [tasks]="tasks"
-    [showAssignee]="false">
-  </app-task-list>
-
+  <app-task-list [tasks]="tasks" [showAssignee]="false" />
 </div>
