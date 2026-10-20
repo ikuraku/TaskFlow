@@ -1,0 +1,76 @@
+<div
+  appHighlight="#e0f2fe"
+  appOverdue
+  [dueDate]="task().dueDate"
+  [done]="task().status === 'Terminé'"
+  class="rounded border-l-4 p-3 shadow-sm ring-1 ring-gray-200 transition"
+  [class.opacity-60]="task().status === 'Terminé'">
+
+  <!-- Symbole de priorité + titre + statut -->
+  <div class="flex items-start justify-between gap-2">
+    <div class="flex items-start gap-2">
+
+      @switch (task().priority) {
+        @case ('Haute') {
+          <span class="text-red-600" title="Priorité haute">▲</span>
+        }
+        @case ('Moyenne') {
+          <span class="text-amber-500" title="Priorité moyenne">●</span>
+        }
+        @case ('Basse') {
+          <span class="text-slate-400" title="Priorité basse">▼</span>
+        }
+      }
+
+      <p
+        class="font-medium text-gray-900"
+        [class.line-through]="task().status === 'Terminé'">
+        {{ task().title }}
+      </p>
+    </div>
+
+    @switch (task().status) {
+      @case ('Terminé') {
+        <span class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+          {{ task().status }}
+        </span>
+      }
+      @case ('En cours') {
+        <span class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
+          {{ task().status }}
+        </span>
+      }
+      @default {
+        <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
+          {{ task().status }}
+        </span>
+      }
+    }
+  </div>
+
+  <!-- Priorité en toutes lettres -->
+  <p class="mt-1 text-xs text-gray-500">Priorité : {{ task().priority }}</p>
+
+  <!-- Description : seulement si elle existe -->
+  @if (task().description) {
+    <p
+      class="mt-2 cursor-help text-sm text-gray-600"
+      [appTooltip]="task().description!">
+      {{ task().description | truncate:40 }}
+    </p>
+  }
+
+  <!-- Échéance -->
+  <p class="mt-2 text-xs text-gray-500">
+    @if (task().dueDate) {
+      {{ task().dueDate | date:'dd/MM/yyyy' }} · {{ task().dueDate | deadline }}
+    } @else {
+      {{ task().dueDate | deadline }}
+    }
+  </p>
+
+  <!-- Assigné : masqué quand showAssignee vaut false -->
+  @if (showAssignee() && assigneeName()) {
+    <p class="mt-1 text-xs text-indigo-600">Assignée à : {{ assigneeName() }}</p>
+  }
+</div>
