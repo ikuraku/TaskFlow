@@ -6,14 +6,12 @@ import { DeadlinePipe } from '../../../../shared/pipes/deadline.pipe';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
 import { OverdueDirective } from '../../../../shared/directives/overdue.directive';
 import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
+import { StatusIconPipe } from '../../../../shared/pipes/status-icon.pipe';
 
 @Component({
   selector: 'app-task-item',
   standalone: true,
-  imports: [
-    DatePipe, TruncatePipe, DeadlinePipe,
-    HighlightDirective, OverdueDirective, TooltipDirective,
-  ],
+  imports: [DatePipe, TruncatePipe, DeadlinePipe, StatusIconPipe, HighlightDirective, OverdueDirective, TooltipDirective],
   templateUrl: './task-item.html',
 })
 export class TaskItem {

@@ -25,7 +25,7 @@
       <p
         class="font-medium text-gray-900"
         [class.line-through]="task().status === 'Terminé'">
-        {{ task().title }}
+        {{ task().status | statusIcon }} {{ task().title }}
       </p>
     </div>
 

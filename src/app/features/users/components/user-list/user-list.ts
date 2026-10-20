@@ -11,6 +11,8 @@ import { UserCard } from '../user-card/user-card';
 
 import { EmptyState }
   from '../../../../shared/components/empty-state/empty-state';
+import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
+
 
 @Component({
   selector: 'app-user-list',
@@ -18,7 +20,8 @@ import { EmptyState }
   imports: [
     FormsModule,
     UserCard,
-    EmptyState
+    EmptyState ,
+    AutofocusDirective
   ],
   templateUrl: './user-list.html'
 })

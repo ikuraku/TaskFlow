@@ -4,14 +4,13 @@
     Utilisateurs
   </h1>
 
-
   <input
+    appAutofocus
     type="text"
     [(ngModel)]="searchTerm"
     placeholder="Rechercher un utilisateur..."
     class="w-full border border-gray-300 rounded-lg p-3 mb-6"
   />
-
 
   @if (filteredUsers.length > 0) {
 
