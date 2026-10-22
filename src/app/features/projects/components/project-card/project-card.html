@@ -5,78 +5,78 @@
 
   <!-- Titre + statut -->
   <div class="flex items-start justify-between gap-2">
-    <h3 class="text-base font-bold text-gray-900">{{ project.name | uppercase }}</h3>
+    <h3 class="text-base font-bold text-gray-900">{{ project().name | uppercase }}</h3>
 
-    @switch (project.status) {
+    @switch (project().status) {
       @case ('En cours') {
         <span class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700">
-          {{ project.status }}
+          {{ project().status }}
         </span>
       }
       @case ('Terminé') {
         <span class="shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-          {{ project.status }}
+          {{ project().status }}
         </span>
       }
       @default {
         <span class="shrink-0 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
-          {{ project.status }}
+          {{ project().status }}
         </span>
       }
     }
   </div>
 
-  <p class="mt-1 text-sm text-gray-600">{{ project.description }}</p>
+  <p class="mt-1 text-sm text-gray-600">{{ project().description }}</p>
 
   <!-- Infos -->
   <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
     <div>
       <dt class="text-xs text-gray-500">Début</dt>
-      <dd class="font-medium">{{ project.startDate | date:'dd MMMM yyyy' }}</dd>
+      <dd class="font-medium">{{ project().startDate | date:'dd MMMM yyyy' }}</dd>
     </div>
     <div>
       <dt class="text-xs text-gray-500">Budget</dt>
-      <dd class="font-medium">{{ project.budget | currency:'TND':'code':'1.2-2' }}</dd>
+      <dd class="font-medium">{{ project().budget | currency:'TND':'code':'1.2-2' }}</dd>
     </div>
   </dl>
 
-  @if (project.tasks.length > 0) {
+  @if (project().tasks.length > 0) {
 
-    <!-- Avancement -->
+    <!-- Avancement : se met à jour à chaque changement de statut -->
     <div class="mt-3">
       <div class="flex justify-between text-xs text-gray-600">
-        <span>Réalisation</span>
-        <span class="font-medium">{{ completionRate | percent:'1.0-0' }}</span>
+        <span>Terminées : {{ doneCount() }} / {{ project().tasks.length }}</span>
+        <span class="font-medium">{{ completionRate() | percent:'1.0-0' }}</span>
       </div>
       <div class="mt-1 h-2 overflow-hidden rounded-full bg-gray-200">
         <div
-          class="h-full rounded-full bg-green-500"
-          [style.width.%]="completionRate * 100">
+          class="h-full rounded-full bg-green-500 transition-all"
+          [style.width.%]="completionRate() * 100">
         </div>
       </div>
       <p class="mt-1 text-xs text-gray-500">
-        Coût moyen par tâche : {{ averageCost | number:'1.0-0' }} TND
+        Coût moyen par tâche : {{ averageCost() | number:'1.0-0' }} TND
       </p>
     </div>
 
-    <!-- Aperçu des 3 premières tâches, avec changement de statut -->
+    <!-- Aperçu des 3 premières tâches -->
     <div class="mt-3">
       <app-task-list
-        [tasks]="(project.tasks | slice:0:3)"
-        [users]="users"
+        [tasks]="(project().tasks | slice:0:3)"
+        [users]="users()"
         (taskStatusChange)="onTaskStatusChange($event)">
       </app-task-list>
 
-      @if (project.tasks.length > 3) {
+      @if (project().tasks.length > 3) {
         <p class="mt-1 text-xs text-gray-500">
-          + {{ project.tasks.length - 3 }} autre(s) : cliquer sur le projet
+          + {{ project().tasks.length - 3 }} autre(s) : cliquer sur le projet
         </p>
       }
     </div>
 
     <!-- Compteurs par priorité -->
     <div class="mt-3 flex flex-wrap gap-2 text-xs">
-      @for (item of tasksByPriority | keyvalue; track item.key) {
+      @for (item of tasksByPriority() | keyvalue; track item.key) {
         <span class="rounded bg-gray-100 px-2 py-1 text-gray-700">
           {{ item.key }} : {{ item.value }}
         </span>

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Project } from '../../models/project.model';
 import { ProjectTaskStatusChange, TaskStatusChange } from '../../models/task.model';
 import { User } from '../../../users/models/user.model';
@@ -17,55 +17,59 @@ export class ProjectList implements OnInit {
   private projectService = inject(ProjectService);
   private userService = inject(UserService);
 
-  projects: Project[] = [];
-  users: User[] = [];
-  selectedProject?: Project;
+  // 4.1 : les projets vivent dans un signal
+  projects = signal<Project[]>([]);
+  users = signal<User[]>([]);
+  selectedProjectId = signal<number | null>(null);
+
+  // On mémorise l'identifiant, pas l'objet : le projet sélectionné
+  // est retrouvé dans la liste à jour après chaque modification
+  selectedProject = computed(
+    () => this.projects().find(p => p.id === this.selectedProjectId()) ?? null
+  );
+
+  totalTasks = computed(() => this.projects().reduce((sum, p) => sum + p.tasks.length, 0));
+
+  doneTasks = computed(() =>
+    this.projects().reduce((sum, p) => sum + p.tasks.filter(t => t.status === 'Terminé').length, 0)
+  );
 
   ngOnInit(): void {
-    this.projectService.getProjects().subscribe(projects => (this.projects = projects));
-    this.userService.getUsers().subscribe(users => (this.users = users));
+    // RxJS conservé : on s'abonne, puis on place le résultat dans le signal
+    this.projectService.getProjects().subscribe(projects => this.projects.set(projects));
+    this.userService.getUsers().subscribe(users => this.users.set(users));
   }
 
   selectProject(project: Project): void {
-    this.selectedProject = this.selectedProject?.id === project.id ? undefined : project;
+    this.selectedProjectId.update(id => (id === project.id ? null : project.id));
   }
 
   closeDetail(): void {
-    this.selectedProject = undefined;
+    this.selectedProjectId.set(null);
   }
 
-  // Reçoit { projectId, taskId, status } et remplace le projet et la tâche concernés
+  // 4.1 + 4.2 : update() avec une mise à jour immuable
   onTaskStatusChange(change: ProjectTaskStatusChange): void {
-    this.projects = this.projects.map(project =>
-      project.id !== change.projectId
-        ? project
-        : {
-          ...project,
-          tasks: project.tasks.map(task =>
-            task.id === change.taskId ? { ...task, status: change.status } : task
-          ),
-        }
+    this.projects.update(projects =>
+      projects.map(project =>
+        project.id !== change.projectId
+          ? project // projet inchangé : même objet
+          : {
+            ...project, // nouveau projet
+            tasks: project.tasks.map(task =>
+              task.id === change.taskId
+                ? { ...task, status: change.status } // nouvelle tâche
+                : task
+            ),
+          }
+      )
     );
-
-    // Le panneau de détail doit pointer vers le nouveau projet, pas l'ancien
-    if (this.selectedProject) {
-      this.selectedProject = this.projects.find(p => p.id === this.selectedProject!.id);
-    }
   }
 
-  // Changement venu du panneau de détail : le projet concerné est le projet sélectionné
+  // Changement venu du panneau de détail
   onDetailStatusChange(change: TaskStatusChange): void {
-    if (!this.selectedProject) return;
-    this.onTaskStatusChange({ projectId: this.selectedProject.id, ...change });
-  }
-  get totalTasks(): number {
-    return this.projects.reduce((sum, p) => sum + p.tasks.length, 0);
-  }
-
-  get doneTasks(): number {
-    return this.projects.reduce(
-      (sum, p) => sum + p.tasks.filter(t => t.status === 'Terminé').length,
-      0
-    );
+    const projectId = this.selectedProjectId();
+    if (projectId === null) return;
+    this.onTaskStatusChange({ projectId, ...change });
   }
 }

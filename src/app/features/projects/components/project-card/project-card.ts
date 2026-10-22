@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe, DecimalPipe, KeyValuePipe, PercentPipe, SlicePipe, UpperCasePipe } from '@angular/common';
 import { Project } from '../../models/project.model';
 import { ProjectTaskStatusChange, TaskStatusChange } from '../../models/task.model';
@@ -16,37 +16,39 @@ import { HighlightDirective } from '../../../../shared/directives/highlight.dire
   templateUrl: './project-card.html',
 })
 export class ProjectCard {
-  @Input({ required: true }) project!: Project;
-  @Input() users: User[] = [];
+  project = input.required<Project>();
+  users = input<User[]>([]);
 
-  @Output() selected = new EventEmitter<Project>();
-  @Output() taskStatusChange = new EventEmitter<ProjectTaskStatusChange>();
+  selected = output<Project>();
+  taskStatusChange = output<ProjectTaskStatusChange>();
 
-  onSelect(): void {
-    this.selected.emit(this.project);
-  }
+  // 4.3 : nombre de tâches terminées de CE projet
+  doneCount = computed(() => this.project().tasks.filter(t => t.status === 'Terminé').length);
 
-  // On n'écrit rien dans this.project : on ajoute projectId et on remonte
-  onTaskStatusChange(change: TaskStatusChange): void {
-    this.taskStatusChange.emit({ projectId: this.project.id, ...change });
-  }
+  // 4.4 : avancement entre 0 et 1, calculé à partir de doneCount()
+  completionRate = computed(() => {
+    const total = this.project().tasks.length;
+    return total === 0 ? 0 : this.doneCount() / total;
+  });
 
-  get completionRate(): number {
-    const total = this.project.tasks.length;
-    if (total === 0) return 0;
-    return this.project.tasks.filter(t => t.status === 'Terminé').length / total;
-  }
+  averageCost = computed(() => {
+    const total = this.project().tasks.length;
+    return total === 0 ? 0 : this.project().budget / total;
+  });
 
-  get averageCost(): number {
-    const total = this.project.tasks.length;
-    return total === 0 ? 0 : this.project.budget / total;
-  }
-
-  get tasksByPriority(): Record<string, number> {
+  tasksByPriority = computed(() => {
     const counts: Record<string, number> = {};
-    for (const task of this.project.tasks) {
+    for (const task of this.project().tasks) {
       counts[task.priority] = (counts[task.priority] ?? 0) + 1;
     }
     return counts;
+  });
+
+  onSelect(): void {
+    this.selected.emit(this.project());
+  }
+
+  onTaskStatusChange(change: TaskStatusChange): void {
+    this.taskStatusChange.emit({ projectId: this.project().id, ...change });
   }
 }
