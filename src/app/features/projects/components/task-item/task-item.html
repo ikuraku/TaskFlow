@@ -73,4 +73,14 @@
   @if (showAssignee() && assigneeName()) {
     <p class="mt-1 text-xs text-indigo-600">Assignée à : {{ assigneeName() }}</p>
   }
+  <!-- Bouton : à chaque clic, la tâche passe au statut suivant -->
+  @if (editable()) {
+    <button
+      type="button"
+      (click)="changeStatus($event)"
+      class="mt-2 rounded border border-indigo-300 px-2 py-1 text-xs text-indigo-700 hover:bg-indigo-50">
+      Changer le statut
+    </button>
+  }
+
 </div>

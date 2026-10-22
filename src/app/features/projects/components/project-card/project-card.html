@@ -59,23 +59,20 @@
       </p>
     </div>
 
-    <!-- Aperçu des 3 premières tâches -->
-    <ul class="mt-3 space-y-1 text-sm">
-      @for (task of project.tasks | slice:0:3; track task.id) {
-        <li class="flex items-center gap-2">
-          <span
-            class="h-2 w-2 shrink-0 rounded-full"
-            [class.bg-green-500]="task.status === 'Terminé'"
-            [class.bg-blue-500]="task.status === 'En cours'"
-            [class.bg-gray-400]="task.status === 'En attente'">
-          </span>
-          <span class="truncate">{{ task.title }}</span>
-        </li>
-      }
+    <!-- Aperçu des 3 premières tâches, avec changement de statut -->
+    <div class="mt-3">
+      <app-task-list
+        [tasks]="(project.tasks | slice:0:3)"
+        [users]="users"
+        (taskStatusChange)="onTaskStatusChange($event)">
+      </app-task-list>
+
       @if (project.tasks.length > 3) {
-        <li class="text-xs text-gray-500">+ {{ project.tasks.length - 3 }} autre(s)</li>
+        <p class="mt-1 text-xs text-gray-500">
+          + {{ project.tasks.length - 3 }} autre(s) : cliquer sur le projet
+        </p>
       }
-    </ul>
+    </div>
 
     <!-- Compteurs par priorité -->
     <div class="mt-3 flex flex-wrap gap-2 text-xs">

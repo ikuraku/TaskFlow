@@ -1,6 +1,9 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CurrencyPipe, DatePipe, DecimalPipe, KeyValuePipe, PercentPipe, SlicePipe, UpperCasePipe } from '@angular/common';
 import { Project } from '../../models/project.model';
+import { ProjectTaskStatusChange, TaskStatusChange } from '../../models/task.model';
+import { User } from '../../../users/models/user.model';
+import { TaskList } from '../task-list/task-list';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
 
 @Component({
@@ -8,16 +11,24 @@ import { HighlightDirective } from '../../../../shared/directives/highlight.dire
   standalone: true,
   imports: [
     UpperCasePipe, DatePipe, CurrencyPipe, PercentPipe, DecimalPipe, SlicePipe, KeyValuePipe,
-    HighlightDirective,
+    HighlightDirective, TaskList,
   ],
   templateUrl: './project-card.html',
 })
 export class ProjectCard {
   @Input({ required: true }) project!: Project;
+  @Input() users: User[] = [];
+
   @Output() selected = new EventEmitter<Project>();
+  @Output() taskStatusChange = new EventEmitter<ProjectTaskStatusChange>();
 
   onSelect(): void {
     this.selected.emit(this.project);
+  }
+
+  // On n'écrit rien dans this.project : on ajoute projectId et on remonte
+  onTaskStatusChange(change: TaskStatusChange): void {
+    this.taskStatusChange.emit({ projectId: this.project.id, ...change });
   }
 
   get completionRate(): number {

@@ -4,7 +4,9 @@
       <app-task-item
         [task]="task"
         [showAssignee]="showAssignee()"
-        [assigneeName]="getAssigneeName(task.assigneeId)">
+        [assigneeName]="getAssigneeName(task.assigneeId)"
+        [editable]="editable()"
+        (taskStatusChange)="onStatusChange(task.id, $event)">
       </app-task-item>
     </li>
   } @empty {
