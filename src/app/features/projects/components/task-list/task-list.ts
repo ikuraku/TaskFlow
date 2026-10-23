@@ -15,14 +15,15 @@ export class TaskList {
   showAssignee = input(true);
   editable = input(true);
 
-  // Remonte : identifiant de la tâche + nouveau statut
   taskStatusChange = output<TaskStatusChange>();
 
+  // Table id → nom, construite à partir des utilisateurs reçus en entrée
   private userNames = computed(() => new Map(this.users().map(u => [u.id, u.name])));
 
-  getAssigneeName(assigneeId?: number): string {
-    if (assigneeId === undefined) return 'Non assignée';
-    return this.userNames().get(assigneeId) ?? 'Non assignée';
+  // null = tâche non assignée, nom = utilisateur trouvé, sinon identifiant inconnu
+  getAssigneeName(assigneeId?: number): string | null {
+    if (assigneeId === undefined) return null;
+    return this.userNames().get(assigneeId) ?? 'Utilisateur inconnu';
   }
 
   onStatusChange(taskId: number, status: TaskStatus): void {

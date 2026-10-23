@@ -17,27 +17,47 @@ export class ProjectList implements OnInit {
   private projectService = inject(ProjectService);
   private userService = inject(UserService);
 
-  // 4.1 : les projets vivent dans un signal
   projects = signal<Project[]>([]);
   users = signal<User[]>([]);
+  searchTerm = signal('');
   selectedProjectId = signal<number | null>(null);
 
-  // On mémorise l'identifiant, pas l'objet : le projet sélectionné
-  // est retrouvé dans la liste à jour après chaque modification
+  // Projets filtrés par la recherche (nom ou description)
+  filteredProjects = computed(() => {
+    const term = this.searchTerm().trim().toLowerCase();
+    if (!term) return this.projects();
+    return this.projects().filter(
+      p => p.name.toLowerCase().includes(term) || p.description.toLowerCase().includes(term)
+    );
+  });
+
+  // Le détail n'est affiché que si le projet sélectionné fait partie des projets filtrés
   selectedProject = computed(
-    () => this.projects().find(p => p.id === this.selectedProjectId()) ?? null
+    () => this.filteredProjects().find(p => p.id === this.selectedProjectId()) ?? null
   );
 
-  totalTasks = computed(() => this.projects().reduce((sum, p) => sum + p.tasks.length, 0));
+  totalTasks = computed(() =>
+    this.filteredProjects().reduce((sum, p) => sum + p.tasks.length, 0)
+  );
 
   doneTasks = computed(() =>
-    this.projects().reduce((sum, p) => sum + p.tasks.filter(t => t.status === 'Terminé').length, 0)
+    this.filteredProjects().reduce(
+      (sum, p) => sum + p.tasks.filter(t => t.status === 'Terminé').length,
+      0
+    )
   );
 
   ngOnInit(): void {
-    // RxJS conservé : on s'abonne, puis on place le résultat dans le signal
     this.projectService.getProjects().subscribe(projects => this.projects.set(projects));
     this.userService.getUsers().subscribe(users => this.users.set(users));
+  }
+
+  onSearch(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
+  }
+
+  clearSearch(): void {
+    this.searchTerm.set('');
   }
 
   selectProject(project: Project): void {
@@ -48,25 +68,22 @@ export class ProjectList implements OnInit {
     this.selectedProjectId.set(null);
   }
 
-  // 4.1 + 4.2 : update() avec une mise à jour immuable
+  // Mise à jour immuable (partie 4)
   onTaskStatusChange(change: ProjectTaskStatusChange): void {
     this.projects.update(projects =>
       projects.map(project =>
         project.id !== change.projectId
-          ? project // projet inchangé : même objet
+          ? project
           : {
-            ...project, // nouveau projet
+            ...project,
             tasks: project.tasks.map(task =>
-              task.id === change.taskId
-                ? { ...task, status: change.status } // nouvelle tâche
-                : task
+              task.id === change.taskId ? { ...task, status: change.status } : task
             ),
           }
       )
     );
   }
 
-  // Changement venu du panneau de détail
   onDetailStatusChange(change: TaskStatusChange): void {
     const projectId = this.selectedProjectId();
     if (projectId === null) return;

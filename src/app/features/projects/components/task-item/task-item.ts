@@ -1,8 +1,9 @@
 import { Component, computed, input, output } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass, NgStyle } from '@angular/common';
 import { Task, TaskStatus } from '../../models/task.model';
 import { TruncatePipe } from '../../../../shared/pipes/truncate.pipe';
 import { DeadlinePipe } from '../../../../shared/pipes/deadline.pipe';
+import { InitialsPipe } from '../../../../shared/pipes/initials.pipe';
 import { StatusIconPipe } from '../../../../shared/pipes/status-icon.pipe';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
 import { OverdueDirective } from '../../../../shared/directives/overdue.directive';
@@ -15,11 +16,19 @@ const NEXT_STATUS: Record<TaskStatus, TaskStatus> = {
   'Terminé': 'En attente',
 };
 
+// Avancement de la tâche selon son statut (pour ngStyle)
+const PROGRESS: Record<TaskStatus, { width: number; color: string }> = {
+  'En attente': { width: 0, color: '#9ca3af' },
+  'En cours': { width: 50, color: '#3b82f6' },
+  'Terminé': { width: 100, color: '#22c55e' },
+};
+
 @Component({
   selector: 'app-task-item',
   standalone: true,
   imports: [
-    DatePipe, TruncatePipe, DeadlinePipe, StatusIconPipe,
+    DatePipe, NgClass, NgStyle,
+    TruncatePipe, DeadlinePipe, InitialsPipe, StatusIconPipe,
     HighlightDirective, OverdueDirective, TooltipDirective,
   ],
   templateUrl: './task-item.html',
@@ -30,12 +39,16 @@ export class TaskItem {
   assigneeName = input<string | null>(null);
   editable = input(true);
 
-  // Événement envoyé au parent, avec le NOUVEAU statut
   taskStatusChange = output<TaskStatus>();
+
+  // Objet utilisé par [ngStyle] : largeur en % et couleur de la barre
+  progressStyle = computed(() => {
+    const p = PROGRESS[this.task().status];
+    return { 'width.%': p.width, 'background-color': p.color };
+  });
 
   changeStatus(event: Event): void {
     event.stopPropagation(); // évite de sélectionner la carte projet derrière le bouton
-    const next = NEXT_STATUS[this.task().status];
-    this.taskStatusChange.emit(next);
+    this.taskStatusChange.emit(NEXT_STATUS[this.task().status]);
   }
 }
