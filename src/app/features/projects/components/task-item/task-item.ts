@@ -8,7 +8,7 @@ import { StatusIconPipe } from '../../../../shared/pipes/status-icon.pipe';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
 import { OverdueDirective } from '../../../../shared/directives/overdue.directive';
 import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
-
+import { TaskStatusBadge } from '../../../../shared/components/task-status-badge/task-status-badge';
 const NEXT_STATUS: Record<TaskStatus, TaskStatus> = {
   'En attente': 'En cours',
   'En cours': 'Terminé',
@@ -27,7 +27,7 @@ const PROGRESS: Record<TaskStatus, { width: number; color: string }> = {
   imports: [
     DatePipe, NgClass, NgStyle,
     TruncatePipe, DeadlinePipe, InitialsPipe, StatusIconPipe,
-    HighlightDirective, OverdueDirective, TooltipDirective,
+    HighlightDirective, OverdueDirective, TooltipDirective, TaskStatusBadge,
   ],
   templateUrl: './task-item.html',
 })
