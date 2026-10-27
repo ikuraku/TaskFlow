@@ -28,7 +28,6 @@
 
   <p class="mt-1 text-sm text-gray-600">{{ project().description }}</p>
 
-  <!-- Infos -->
   <dl class="mt-3 grid grid-cols-2 gap-2 text-sm">
     <div>
       <dt class="text-xs text-gray-500">Début</dt>
@@ -42,7 +41,7 @@
 
   @if (project().tasks.length > 0) {
 
-    <!-- Avancement : se met à jour à chaque changement de statut -->
+    <!-- Avancement : calculé sur TOUTES les tâches du projet -->
     <div class="mt-3">
       <div class="flex justify-between text-xs text-gray-600">
         <span>Terminées : {{ doneCount() }} / {{ project().tasks.length }}</span>
@@ -59,17 +58,20 @@
       </p>
     </div>
 
-    <!-- Aperçu des 3 premières tâches -->
+    <!-- Aperçu des tâches : filtre appliqué, limité à 3 -->
     <div class="mt-3">
       <app-task-list
-        [tasks]="(project().tasks | slice:0:3)"
+        [tasks]="project().tasks"
         [users]="users()"
-        (taskStatusChange)="onTaskStatusChange($event)">
+        [statusFilter]="statusFilter()"
+        [limit]="previewLimit"
+        (taskStatusChange)="onTaskStatusChange($event)"
+        (taskDelete)="onTaskDelete($event)">
       </app-task-list>
 
-      @if (project().tasks.length > 3) {
+      @if (filteredCount() > previewLimit) {
         <p class="mt-1 text-xs text-gray-500">
-          + {{ project().tasks.length - 3 }} autre(s) : cliquer sur le projet
+          + {{ filteredCount() - previewLimit }} autre(s) : cliquer sur le projet
         </p>
       }
     </div>

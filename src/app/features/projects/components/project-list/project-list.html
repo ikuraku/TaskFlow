@@ -1,6 +1,6 @@
 <section class="mx-auto max-w-6xl p-6">
 
-  <!-- En-tête + statistiques des projets affichés -->
+  <!-- En-tête + statistiques -->
   <header class="mb-6">
     <h1 class="text-3xl font-bold text-gray-900">Mes projets</h1>
 
@@ -37,11 +37,38 @@
         </button>
       }
     </div>
+
+    <!-- Filtre des tâches + réinitialisation -->
+    <div class="mt-4 flex flex-wrap items-center gap-2">
+      <span class="text-sm text-gray-600">Afficher les tâches :</span>
+
+      @for (option of filterOptions; track option.value) {
+        <button
+          type="button"
+          (click)="setFilter(option.value)"
+          class="rounded-full border px-3 py-1 text-sm transition"
+          [class.border-indigo-600]="statusFilter() === option.value"
+          [class.bg-indigo-600]="statusFilter() === option.value"
+          [class.text-white]="statusFilter() === option.value"
+          [class.border-gray-300]="statusFilter() !== option.value"
+          [class.bg-white]="statusFilter() !== option.value"
+          [class.text-gray-700]="statusFilter() !== option.value">
+          {{ option.label }}
+        </button>
+      }
+
+      <button
+        type="button"
+        (click)="resetData()"
+        class="ml-auto rounded-full border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50">
+        Réinitialiser les données
+      </button>
+    </div>
   </header>
 
   @if (filteredProjects().length > 0) {
 
-    <!-- Cartes : uniquement les projets filtrés -->
+    <!-- Cartes -->
     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
       @for (project of filteredProjects(); track project.id) {
         <div
@@ -51,8 +78,10 @@
           <app-project-card
             [project]="project"
             [users]="users()"
+            [statusFilter]="statusFilter()"
             (selected)="selectProject($event)"
-            (taskStatusChange)="onTaskStatusChange($event)">
+            (taskStatusChange)="onTaskStatusChange($event)"
+            (taskDelete)="onTaskDelete($event)">
           </app-project-card>
         </div>
       }
@@ -77,7 +106,9 @@
         <app-task-list
           [tasks]="selected.tasks"
           [users]="users()"
-          (taskStatusChange)="onDetailStatusChange($event)">
+          [statusFilter]="statusFilter()"
+          (taskStatusChange)="onDetailStatusChange($event)"
+          (taskDelete)="onDetailDelete($event)">
         </app-task-list>
       </div>
     }

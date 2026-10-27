@@ -9,14 +9,12 @@ import { HighlightDirective } from '../../../../shared/directives/highlight.dire
 import { OverdueDirective } from '../../../../shared/directives/overdue.directive';
 import { TooltipDirective } from '../../../../shared/directives/tooltip.directive';
 
-// Cycle : En attente → En cours → Terminé → En attente
 const NEXT_STATUS: Record<TaskStatus, TaskStatus> = {
   'En attente': 'En cours',
   'En cours': 'Terminé',
   'Terminé': 'En attente',
 };
 
-// Avancement de la tâche selon son statut (pour ngStyle)
 const PROGRESS: Record<TaskStatus, { width: number; color: string }> = {
   'En attente': { width: 0, color: '#9ca3af' },
   'En cours': { width: 50, color: '#3b82f6' },
@@ -40,15 +38,20 @@ export class TaskItem {
   editable = input(true);
 
   taskStatusChange = output<TaskStatus>();
+  taskDelete = output<void>(); // suppression : aucune donnée, TaskList connaît l'identifiant
 
-  // Objet utilisé par [ngStyle] : largeur en % et couleur de la barre
   progressStyle = computed(() => {
     const p = PROGRESS[this.task().status];
     return { 'width.%': p.width, 'background-color': p.color };
   });
 
   changeStatus(event: Event): void {
-    event.stopPropagation(); // évite de sélectionner la carte projet derrière le bouton
+    event.stopPropagation();
     this.taskStatusChange.emit(NEXT_STATUS[this.task().status]);
+  }
+
+  deleteTask(event: Event): void {
+    event.stopPropagation(); // évite de sélectionner la carte projet derrière le bouton
+    this.taskDelete.emit();
   }
 }

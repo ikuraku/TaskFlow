@@ -1,6 +1,9 @@
 export type TaskPriority = 'Basse' | 'Moyenne' | 'Haute';
 export type TaskStatus = 'En attente' | 'En cours' | 'Terminé';
 
+/** Filtre d'affichage des tâches. */
+export type TaskFilter = 'Toutes' | 'En cours' | 'Terminé';
+
 export interface Task {
   id: number;
   title: string;
@@ -20,4 +23,10 @@ export interface TaskStatusChange {
 /** Émis par ProjectCard : on ajoute le projet concerné. */
 export interface ProjectTaskStatusChange extends TaskStatusChange {
   projectId: number;
+}
+
+/** Émis par ProjectCard pour une suppression : projet et tâche concernés. */
+export interface ProjectTaskDelete {
+  projectId: number;
+  taskId: number;
 }

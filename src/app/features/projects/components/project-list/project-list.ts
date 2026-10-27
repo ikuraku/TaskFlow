@@ -1,6 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { Project } from '../../models/project.model';
-import { ProjectTaskStatusChange, TaskStatusChange } from '../../models/task.model';
+import {
+  ProjectTaskDelete, ProjectTaskStatusChange, TaskFilter, TaskStatusChange,
+} from '../../models/task.model';
 import { User } from '../../../users/models/user.model';
 import { ProjectCard } from '../project-card/project-card';
 import { TaskList } from '../task-list/task-list';
@@ -22,7 +24,13 @@ export class ProjectList implements OnInit {
   searchTerm = signal('');
   selectedProjectId = signal<number | null>(null);
 
-  // Projets filtrés par la recherche (nom ou description)
+  statusFilter = signal<TaskFilter>('Toutes');
+  readonly filterOptions: { value: TaskFilter; label: string }[] = [
+    { value: 'Toutes', label: 'Toutes' },
+    { value: 'En cours', label: 'En cours' },
+    { value: 'Terminé', label: 'Terminées' },
+  ];
+
   filteredProjects = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     if (!term) return this.projects();
@@ -31,7 +39,6 @@ export class ProjectList implements OnInit {
     );
   });
 
-  // Le détail n'est affiché que si le projet sélectionné fait partie des projets filtrés
   selectedProject = computed(
     () => this.filteredProjects().find(p => p.id === this.selectedProjectId()) ?? null
   );
@@ -52,12 +59,21 @@ export class ProjectList implements OnInit {
     this.userService.getUsers().subscribe(users => this.users.set(users));
   }
 
+  // Sauvegarde l'état actuel dans le navigateur
+  private persist(): void {
+    this.projectService.saveProjects(this.projects());
+  }
+
   onSearch(event: Event): void {
     this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   clearSearch(): void {
     this.searchTerm.set('');
+  }
+
+  setFilter(filter: TaskFilter): void {
+    this.statusFilter.set(filter);
   }
 
   selectProject(project: Project): void {
@@ -68,7 +84,6 @@ export class ProjectList implements OnInit {
     this.selectedProjectId.set(null);
   }
 
-  // Mise à jour immuable (partie 4)
   onTaskStatusChange(change: ProjectTaskStatusChange): void {
     this.projects.update(projects =>
       projects.map(project =>
@@ -82,11 +97,37 @@ export class ProjectList implements OnInit {
           }
       )
     );
+    this.persist();
   }
 
   onDetailStatusChange(change: TaskStatusChange): void {
     const projectId = this.selectedProjectId();
     if (projectId === null) return;
     this.onTaskStatusChange({ projectId, ...change });
+  }
+
+  onTaskDelete(change: ProjectTaskDelete): void {
+    this.projects.update(projects =>
+      projects.map(project =>
+        project.id !== change.projectId
+          ? project
+          : { ...project, tasks: project.tasks.filter(task => task.id !== change.taskId) }
+      )
+    );
+    this.persist();
+  }
+
+  onDetailDelete(taskId: number): void {
+    const projectId = this.selectedProjectId();
+    if (projectId === null) return;
+    this.onTaskDelete({ projectId, taskId });
+  }
+
+  // Remet les données d'origine (efface la sauvegarde)
+  resetData(): void {
+    this.projectService.resetProjects().subscribe(projects => {
+      this.projects.set(projects);
+      this.selectedProjectId.set(null);
+    });
   }
 }

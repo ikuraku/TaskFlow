@@ -1,12 +1,13 @@
 <ul class="space-y-2">
-  @for (task of tasks(); track task.id) {
+  @for (task of visibleTasks(); track task.id) {
     <li>
       <app-task-item
         [task]="task"
         [showAssignee]="showAssignee()"
         [assigneeName]="getAssigneeName(task.assigneeId)"
         [editable]="editable()"
-        (taskStatusChange)="onStatusChange(task.id, $event)">
+        (taskStatusChange)="onStatusChange(task.id, $event)"
+        (taskDelete)="onDelete(task.id)">
       </app-task-item>
     </li>
   } @empty {
