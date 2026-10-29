@@ -1,44 +1,30 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Project } from '../../features/projects/models/project.model';
-import { PROJECTS } from '../../features/projects/data/projects.data';
-
-const STORAGE_KEY = 'taskflow.projects';
+import { Task } from '../../features/projects/models/task.model';
 
 @Injectable({ providedIn: 'root' })
 export class ProjectService {
-  // Données sauvegardées si elles existent, sinon données d'origine
+  readonly id = Math.random().toString(36).slice(2, 8);
+
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:3000/projects';
+
+  constructor() {
+    console.log('ProjectService créé, id =', this.id);
+  }
+
   getProjects(): Observable<Project[]> {
-    return of(this.load() ?? PROJECTS);
+    return this.http.get<Project[]>(this.apiUrl);
   }
 
-  // Appelé après chaque modification (statut, suppression)
-  saveProjects(projects: Project[]): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-    } catch {
-      // stockage indisponible ou plein : l'application continue sans sauvegarde
-    }
+  getProjectById(id: number): Observable<Project> {
+    return this.http.get<Project>(`${this.apiUrl}/${id}`);
   }
 
-  // Efface la sauvegarde et redonne les données d'origine
-  resetProjects(): Observable<Project[]> {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignoré
-    }
-    return of(PROJECTS);
-  }
-
-  private load(): Project[] | null {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      const data = JSON.parse(raw);
-      return Array.isArray(data) ? (data as Project[]) : null;
-    } catch {
-      return null;
-    }
+  // Enregistre la nouvelle liste de tâches d'un projet (statut modifié, tâche supprimée)
+  updateTasks(projectId: number, tasks: Task[]): Observable<Project> {
+    return this.http.patch<Project>(`${this.apiUrl}/${projectId}`, { tasks });
   }
 }

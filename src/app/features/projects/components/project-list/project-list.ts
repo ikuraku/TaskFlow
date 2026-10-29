@@ -55,13 +55,21 @@ export class ProjectList implements OnInit {
   );
 
   ngOnInit(): void {
+    // Partie 1.3 : comparer cet id avec celui affiché par UserList
+    console.log('ProjectList utilise ProjectService id =', this.projectService.id);
+    console.log('ProjectList utilise UserService id =', this.userService.id);
+
     this.projectService.getProjects().subscribe(projects => this.projects.set(projects));
     this.userService.getUsers().subscribe(users => this.users.set(users));
   }
 
-  // Sauvegarde l'état actuel dans le navigateur
-  private persist(): void {
-    this.projectService.saveProjects(this.projects());
+  // Envoie au serveur la liste de tâches à jour d'un projet
+  private saveTasks(projectId: number): void {
+    const project = this.projects().find(p => p.id === projectId);
+    if (!project) return;
+    this.projectService.updateTasks(projectId, project.tasks).subscribe({
+      error: err => console.error('Échec de la sauvegarde', err),
+    });
   }
 
   onSearch(event: Event): void {
@@ -97,7 +105,7 @@ export class ProjectList implements OnInit {
           }
       )
     );
-    this.persist();
+    this.saveTasks(change.projectId);
   }
 
   onDetailStatusChange(change: TaskStatusChange): void {
@@ -114,20 +122,12 @@ export class ProjectList implements OnInit {
           : { ...project, tasks: project.tasks.filter(task => task.id !== change.taskId) }
       )
     );
-    this.persist();
+    this.saveTasks(change.projectId);
   }
 
   onDetailDelete(taskId: number): void {
     const projectId = this.selectedProjectId();
     if (projectId === null) return;
     this.onTaskDelete({ projectId, taskId });
-  }
-
-  // Remet les données d'origine (efface la sauvegarde)
-  resetData(): void {
-    this.projectService.resetProjects().subscribe(projects => {
-      this.projects.set(projects);
-      this.selectedProjectId.set(null);
-    });
   }
 }

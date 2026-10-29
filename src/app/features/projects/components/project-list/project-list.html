@@ -38,7 +38,7 @@
       }
     </div>
 
-    <!-- Filtre des tâches + réinitialisation -->
+    <!-- Filtre des tâches : Toutes / En cours / Terminées -->
     <div class="mt-4 flex flex-wrap items-center gap-2">
       <span class="text-sm text-gray-600">Afficher les tâches :</span>
 
@@ -56,13 +56,6 @@
           {{ option.label }}
         </button>
       }
-
-      <button
-        type="button"
-        (click)="resetData()"
-        class="ml-auto rounded-full border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50">
-        Réinitialiser les données
-      </button>
     </div>
   </header>
 

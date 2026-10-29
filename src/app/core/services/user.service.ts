@@ -1,19 +1,24 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-
+import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { User } from '../../features/users/models/user.model';
-import { USERS } from '../../features/users/data/users.data';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
+  readonly id = Math.random().toString(36).slice(2, 8);
 
-  getUsers(): Observable<User[]> {
-    return of(USERS);
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:3000/users';
+
+  constructor() {
+    console.log('UserService créé, id =', this.id);
   }
 
-  getUserById(id: number): Observable<User | undefined> {
-    return of(USERS.find(user => user.id === id));
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.apiUrl);
+  }
+
+  getUserById(id: number): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/${id}`);
   }
 }
