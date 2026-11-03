@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { CurrencyPipe, DatePipe, DecimalPipe, KeyValuePipe, PercentPipe, UpperCasePipe } from '@angular/common';
 import { Project } from '../../models/project.model';
 import {
@@ -7,6 +7,7 @@ import {
 import { User } from '../../../users/models/user.model';
 import { TaskList } from '../task-list/task-list';
 import { HighlightDirective } from '../../../../shared/directives/highlight.directive';
+import { FavoritesService } from '../../../../core/services/favorites.service';
 
 @Component({
   selector: 'app-project-card',
@@ -18,6 +19,9 @@ import { HighlightDirective } from '../../../../shared/directives/highlight.dire
   templateUrl: './project-card.html',
 })
 export class ProjectCard {
+  // Partie 3 : le service est injecté, pas créé ici
+  favorites = inject(FavoritesService);
+
   project = input.required<Project>();
   users = input<User[]>([]);
   statusFilter = input<TaskFilter>('Toutes');
@@ -48,7 +52,6 @@ export class ProjectCard {
     return counts;
   });
 
-  // Nombre de tâches qui passent le filtre (pour le « + n autre(s) »)
   filteredCount = computed(() => {
     const filter = this.statusFilter();
     return filter === 'Toutes'
@@ -58,6 +61,12 @@ export class ProjectCard {
 
   onSelect(): void {
     this.selected.emit(this.project());
+  }
+
+  // Bouton ★ / ☆ : toggle(project.id) du service
+  onToggleFavorite(event: Event): void {
+    event.stopPropagation(); // évite de sélectionner la carte derrière le bouton
+    this.favorites.toggle(this.project().id);
   }
 
   onTaskStatusChange(change: TaskStatusChange): void {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 
 import { ViewToggle }
   from './shared/components/view-toggle/view-toggle';
@@ -8,6 +8,9 @@ import { ProjectList }
 
 import { UserList }
   from './features/users/components/user-list/user-list';
+
+import { FavoritesService }
+  from './core/services/favorites.service';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +23,9 @@ import { UserList }
   templateUrl: './app.html'
 })
 export class App {
+
+  // Partie 3 : le même service que ProjectCard (singleton)
+  favorites = inject(FavoritesService);
 
   currentView: 'task' | 'user' = 'task';
 
